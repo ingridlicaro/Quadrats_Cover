@@ -1,0 +1,66 @@
+#Packages
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+#Open files
+file_path = 'C:/Quadrats Cover_Intertidal.xlsx'  
+data = pd.read_excel(file_path)
+sns.set(style="whitegrid")
+print(data.head())
+
+#Tabulate data
+beaches = data['Beach'].unique()
+for beach in beaches:
+    beach_data = data[data['Beach'] == beach].melt(id_vars=['Zone'], 
+                                                      value_vars=['Coverage_Red Algae (Rhodophyta)', 'Coverage_Green Algae (Chlorophyta)', 'Coverage_Brown Algae (Phaeophyceae)'],
+                                                      var_name='Coverage Type', 
+                                                      value_name='Percentage')
+
+#Plot cover
+color_palette = {
+        'Coverage_Red Algae (Rhodophyta)': '#B22222',    # Rojo oscuro
+        'Coverage_Green Algae (Chlorophyta)': '#006400',  # Verde oscuro
+        'Coverage_Brown Algae (Phaeophyceae)': '#8B4513'   # Café oscuro
+    }
+plt.figure(figsize=(10, 6))
+sns.barplot(data=beach_data, x='Zone', y='Percentage', hue='Coverage Type', palette=color_palette)
+plt.title(f'Cobertura en {beach}')
+plt.xlabel('Zona')
+plt.ylabel('Cobertura (%)')
+plt.ylim(0, 100)
+plt.xticks(rotation=45)
+plt.legend(title='Tipo de Cobertura')
+plt.tight_layout()
+plt.show()
+
+#Plot circle
+data.columns = data.columns.str.strip()
+
+total_coverage = data[['Coverage_Red Algae (Rhodophyta)', 
+                       'Coverage_Green Algae (Chlorophyta)', 
+                       'Coverage_Brown Algae (Phaeophyceae)']].sum()
+
+colors = ['#B22222', '#006400', '#8B4513'] 
+labels = ['Red Algae', 'Green Algae', 'Brown Algae']
+
+plt.figure(figsize=(8, 8))
+
+wedges, texts, autotexts = plt.pie(total_coverage, 
+                                   labels=labels, 
+                                   autopct='%1.1f%%', 
+                                   startangle=90, 
+                                   colors=colors,
+                                   textprops={'color': 'white', 'weight': 'bold'},  # Texto blanco y negrita
+                                   pctdistance=0.75)  
+
+centre_circle = plt.Circle((0, 0), 0.60, fc='white')  
+fig = plt.gcf()
+fig.gca().add_artist(centre_circle)
+
+plt.legend(wedges, labels, title="Macroalgas", loc="upper right", bbox_to_anchor=(1, 1))
+
+plt.title('Cobertura Total de Macroalgas Matosinhos', fontweight='bold', y=0.95)
+plt.axis('equal')  
+plt.tight_layout()
+plt.show()
